@@ -16,15 +16,20 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    sh 'docker tag my-static-website utkarsh786/my-static-website:latest'
-                    sh 'docker login -u utkarsh786 -p 76YeOD@1'
-                    sh 'docker push utkarsh786/my-static-website:latest'
-                }
+       stage('Push to Docker Hub') {
+    steps {
+        script {
+            sh 'docker tag my-static-website utkarsh786/my-static-website:latest'
+            
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
             }
+            
+            sh 'docker push utkarsh786/my-static-website:latest'
         }
+    }
+}
+
 
         stage('Deploy on Server') {
             steps {
